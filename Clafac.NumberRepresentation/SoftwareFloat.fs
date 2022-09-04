@@ -23,7 +23,7 @@ let minExponent fmt = -(1L <<< int32(fmt.ExponentBits-1u))+2L
 let implicitMantissaBit fmt = (1UL <<< int32(fmt.MantissaBits))
 let mantissaMask fmt = (implicitMantissaBit fmt)-1UL
 
-let isNormal f = not (minExponent f.Format = f.Exponent)
+let isNormal f = f.Mantissa >= implicitMantissaBit f.Format
 
 let alignMantissas a b =
     let maxExp = Math.Max(a.Exponent, b.Exponent)
