@@ -9,6 +9,7 @@
         <Compile Include="MathUtil.fs" />
         <Compile Include="SoftwareFloat.fs" />
         <Compile Include="FloatImplementations\Ieee754Single.fs" />
+        <Compile Include="FloatImplementations\FourBitFloat.fs" />
     </ItemGroup>
 
 </Project>
