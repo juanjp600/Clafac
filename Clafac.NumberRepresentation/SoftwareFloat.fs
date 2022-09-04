@@ -25,6 +25,18 @@ let mantissaMask fmt = (implicitMantissaBit fmt)-1UL
 
 let isNormal f = f.Mantissa >= implicitMantissaBit f.Format
 
+let packedForm f =
+    let denormalExpRepresentation = int32 (minExponent f.Format) - 1
+    
+    let exponentRepresentation =
+        if isNormal f
+            then (int32 f.Exponent) - denormalExpRepresentation
+            else 0
+    
+    (if f.Sign then 1UL <<< int32 (f.Format.MantissaBits + f.Format.ExponentBits) else 0UL)
+    ||| (uint64 exponentRepresentation <<< int32 f.Format.MantissaBits)
+    ||| uint64 (f.Mantissa &&& mantissaMask f.Format)
+
 let alignMantissas a b =
     let maxExp = Math.Max(a.Exponent, b.Exponent)
     let shiftMantissa f =
@@ -89,3 +101,29 @@ let divide a b =
     let quotient = uint64(bma / bmb)
     let newExp = a.Exponent - b.Exponent
     makeFloat (a.Sign <> b.Sign) newExp quotient a.Format
+
+let toString f =
+    let bm = (bigint f.Mantissa)
+    let shiftAmount = int32(int64 f.Format.MantissaBits - f.Exponent)
+    let wholePortion =
+        uint64 (if shiftAmount > 0
+            then bm >>> shiftAmount
+            else bm <<< -shiftAmount)
+    let fractionMask = allOnes shiftAmount
+    let fractionPortion =
+        if wholePortion > 0UL
+            then bm &&& bigint fractionMask
+            else bm
+    let flipBits acc i isSet =
+        acc ||| (if isSet then (bigint 1 <<< (shiftAmount-i-1)) else bigint 0)
+    let flippedFraction = foldBits shiftAmount fractionPortion flipBits
+    let handleBit acc i isSet =
+        let shiftedAcc = acc * bigint 10
+        if isSet
+            then shiftedAcc + (bigint 5) ** (i+1)
+            else shiftedAcc
+    let decimalFraction = foldBits shiftAmount flippedFraction handleBit
+    let decimalStr = decimalFraction.ToString()
+    let decimalStr = decimalStr.PadLeft(shiftAmount, '0')
+    
+    $"{wholePortion}.{decimalStr}".TrimEnd('0').TrimEnd('.')
