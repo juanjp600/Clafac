@@ -14,9 +14,9 @@ type Float(sign, exponent, mantissa) =
     member this.ExponentRepresentation
         with get() =
             let minRepresentedValue = int32 (minExponent Format) - 1
-            if mantissa < implicitMantissaBit Format
-                then 0
-                else (int32 exponent) - minRepresentedValue
+            if isNormal this.Value
+                then (int32 exponent) - minRepresentedValue
+                else 0
     
     member this.PackedValue
         with get() =
