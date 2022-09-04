@@ -27,23 +27,16 @@ test1 myOnePointFive
 
 let myOne = Ieee754Single.Float(false, 0, 0b10000000_00000000_00000000UL)
 let myHalf = Ieee754Single.Float(false, -1, 0b10000000_00000000_00000000UL)
+let myFive = Ieee754Single.Float(false, 2, 0b10100000_00000000_00000000UL)
 
-let test2 (myInitial: Ieee754Single.Float) =
-    let myDoubled = makeIeee (add myInitial.Value myInitial.Value)
-    let myTripled = makeIeee (add myDoubled.Value myInitial.Value)
-    let mySquaredOne = makeIeee (multiply myInitial.Value myInitial.Value)
-    let mySquaredTwo = makeIeee (multiply myDoubled.Value myDoubled.Value)
-    let mySquaredThree = makeIeee (multiply myTripled.Value myTripled.Value)
-    let myThreeTimesInitial = makeIeee (multiply myInitial.Value myTripled.Value)
+let test2 (numerator: Ieee754Single.Float) (denominator: Ieee754Single.Float) =
+    let result = makeIeee (divide numerator.Value denominator.Value)
 
-    printStats myInitial
-    printStats myDoubled
-    printStats myTripled
-    printStats mySquaredOne
-    printStats mySquaredTwo
-    printStats mySquaredThree
-    printStats myThreeTimesInitial
+    printStats numerator
+    printStats denominator
+    printStats result
     printf "**************************\n"
 
-test2 myOne
-test2 myHalf
+test2 myFive myOne
+test2 myFive myHalf
+test2 myFive myOnePointFive

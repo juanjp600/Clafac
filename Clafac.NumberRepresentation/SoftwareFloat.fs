@@ -79,6 +79,13 @@ let subtract a b =
 let multiply a b =
     let bma = bigint a.Mantissa
     let bmb = bigint b.Mantissa
-    let multMantissas = uint64 ((bma * bmb) >>> int32(a.Format.MantissaBits))
+    let product = uint64 ((bma * bmb) >>> int32(a.Format.MantissaBits))
     let newExp = a.Exponent + b.Exponent
-    makeFloat (a.Sign <> b.Sign) newExp multMantissas a.Format
+    makeFloat (a.Sign <> b.Sign) newExp product a.Format
+
+let divide a b =
+    let bma = (bigint a.Mantissa) <<< int32(a.Format.MantissaBits)
+    let bmb = (bigint b.Mantissa)
+    let quotient = uint64(bma / bmb)
+    let newExp = a.Exponent - b.Exponent
+    makeFloat (a.Sign <> b.Sign) newExp quotient a.Format
