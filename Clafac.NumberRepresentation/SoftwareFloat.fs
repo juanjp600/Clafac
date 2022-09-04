@@ -75,3 +75,10 @@ let add a b =
 let subtract a b =
     let b' = { b with Sign = not b.Sign }
     add a b'
+
+let multiply a b =
+    let bma = bigint a.Mantissa
+    let bmb = bigint b.Mantissa
+    let multMantissas = uint64 ((bma * bmb) >>> int32(a.Format.MantissaBits))
+    let newExp = a.Exponent + b.Exponent
+    makeFloat (a.Sign <> b.Sign) newExp multMantissas a.Format
