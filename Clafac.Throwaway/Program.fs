@@ -1,4 +1,3 @@
-open System
 open Clafac.NumberRepresentation.FloatImplementations
 open Clafac.NumberRepresentation.SoftwareFloat
 

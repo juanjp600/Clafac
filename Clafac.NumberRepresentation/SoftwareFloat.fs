@@ -1,4 +1,4 @@
-﻿module rec Clafac.NumberRepresentation.SoftwareFloat
+﻿module Clafac.NumberRepresentation.SoftwareFloat
 
 open System
 open Clafac.NumberRepresentation.MathUtil
