@@ -8,8 +8,21 @@ type Format = {
     MantissaBits: uint
 }
 
+type Sign = Plus | Minus
+
+let flipSign = function
+    | Plus -> Minus
+    | Minus -> Plus
+
+let combineSigns (a: Sign) (b: Sign) =
+    if a <> b then Minus else Plus
+    
+let signToString = function
+    | Plus -> ""
+    | Minus -> "-"
+
 type Float = {
-    Sign: bool; Exponent: int64; Mantissa: uint64
+    Sign: Sign; Exponent: int64; Mantissa: uint64
     Format: Format
 }
 
@@ -33,7 +46,7 @@ let packedForm f =
             then (int32 f.Exponent) - denormalExpRepresentation
             else 0
     
-    (if f.Sign then 1UL <<< int32 (f.Format.MantissaBits + f.Format.ExponentBits) else 0UL)
+    (if f.Sign = Minus then 1UL <<< int32 (f.Format.MantissaBits + f.Format.ExponentBits) else 0UL)
     ||| (uint64 exponentRepresentation <<< int32 f.Format.MantissaBits)
     ||| uint64 (f.Mantissa &&& mantissaMask f.Format)
 
@@ -85,7 +98,7 @@ let add a b =
         else { Format = a.Format; Sign = a.Sign; Exponent = minExponent a.Format; Mantissa = 0UL }
 
 let subtract a b =
-    let b' = { b with Sign = not b.Sign }
+    let b' = { b with Sign = flipSign b.Sign }
     add a b'
 
 let multiply a b =
@@ -93,14 +106,14 @@ let multiply a b =
     let bmb = bigint b.Mantissa
     let product = uint64 ((bma * bmb) >>> int32(a.Format.MantissaBits))
     let newExp = a.Exponent + b.Exponent
-    makeFloat (a.Sign <> b.Sign) newExp product a.Format
+    makeFloat (combineSigns a.Sign b.Sign) newExp product a.Format
 
 let divide a b =
     let bma = (bigint a.Mantissa) <<< int32(a.Format.MantissaBits)
     let bmb = (bigint b.Mantissa)
     let quotient = uint64(bma / bmb)
     let newExp = a.Exponent - b.Exponent
-    makeFloat (a.Sign <> b.Sign) newExp quotient a.Format
+    makeFloat (combineSigns a.Sign b.Sign) newExp quotient a.Format
 
 let toString f =
     let bm = (bigint f.Mantissa)
@@ -125,5 +138,6 @@ let toString f =
     let decimalFraction = foldBits shiftAmount flippedFraction handleBit
     let decimalStr = decimalFraction.ToString()
     let decimalStr = decimalStr.PadLeft(shiftAmount, '0')
-    
-    $"{wholePortion}.{decimalStr}".TrimEnd('0').TrimEnd('.')
+
+    let signStr = signToString f.Sign
+    $"{signStr}{wholePortion}.{decimalStr}".TrimEnd('0').TrimEnd('.')

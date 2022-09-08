@@ -12,6 +12,6 @@ type Float(sign, exponent, mantissa) =
         makeFloat sign exponent mantissa Format
     member this.HardwareValue
         with get() = BitConverter.UInt32BitsToSingle(uint32 (packedForm this.Value))
-    new() = Float(false, minExponent Format, 0UL)
+    new() = Float(Plus, minExponent Format, 0UL)
 
 let Zero = Float()
